@@ -230,7 +230,7 @@ public class Frame extends JFrame {
 				if ((action == right || action == right1) && !Right) {
 					last = 1;
 					Character.setRight();
-					if (goRight(Character.posx, Character.posy, Character.width, Character.hight)) {
+					if (goRight(Character.posx, Character.posy, Character.width, Character.hight , speed)) {
 						Right = true;
 						z5 = new movment();
 						z5.start();
@@ -245,7 +245,7 @@ public class Frame extends JFrame {
 				if ((action == left || action == left1) && !Left) {
 					last = -1;
 					Character.setLeft();
-					if (goLeft(Character.posx, Character.posy, Character.width, Character.hight, speed)) {
+					if (goLeft(Character.posx, Character.posy, Character.hight, speed)) {
 						Left = true;
 						z5 = new movment();
 						z5.start();
@@ -415,13 +415,13 @@ public class Frame extends JFrame {
 				while (!Dead && (i < Math.abs(tempRand))) {
 					i++;
 					if (tempRand > 0) {
-						if (goRight(this.posx + 5, this.posy, this.width, this.hight)&&(LR==0||this.posx<LR)) {
+						if (goRight(this.posx, this.posy, this.width, this.hight, speed)&&(LR==0||this.posx<LR)) {
 							this.posx += 5;
 							repaint();
 						} else
 							break;
 					} else {
-						if (goLeft(this.posx - 5, this.posy, this.width, this.hight, speed)&&(LL==0||this.posx<LL)) {
+						if (goLeft(this.posx - 5, this.posy, this.hight, speed)&&(LL==0||this.posx<LL)) {
 							this.posx -= 5;
 							repaint();
 						} else
@@ -534,39 +534,33 @@ public class Frame extends JFrame {
 			synchronized (lock) {
 				do {
 					if (last == 1 && Right && !Finish) {
-						if (goRight(Character.posx + speed, Character.posy, Character.width, Character.hight)) {
+						if (goRight(Character.posx, Character.posy, Character.width, Character.hight, speed)) {
 							for (int i = 0; i < N; i++)
 								a[i].setX(a[i].getX() - speed);
 							for (int E = 0; E < NE; E++)
 								if (!Enemy[E].Dead) {
 									Enemy[E].ConstantPosx -= speed;
-									if (goRight(Enemy[E].posx - speed, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
-										Enemy[E].posx -= speed;
+									Enemy[E].posx -= speed;
 								}
 							postion += speed;
-						} else if (goRight(Character.posx + 1, Character.posy, Character.width, Character.hight)) {
-							for (int i = 0; i < N; i++)
-								a[i].setX(a[i].getX() - 1);
-							for (int E = 0; E < NE; E++)
-								if (!Enemy[E].Dead) {
-									Enemy[E].ConstantPosx -= 1;
-									if (goRight(Enemy[E].posx - 1, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
-										Enemy[E].posx -= 1;
-								}
-							postion += 1;
-						}
+						} 
 
 					}
 					if (last == -1 && !Finish && Left) {
-						if (goLeft(Character.posx, Character.posy, Character.width, Character.hight, speed)) {
-							for (int i = 0; i < N; i++)
-								a[i].setX(a[i].getX() + speed);
-							for (int E = 0; E < NE; E++)
-								if (!Enemy[E].Dead) {
-									Enemy[E].ConstantPosx += speed;
-									Enemy[E].posx += speed;
-								}
-							postion -= speed;
+						for(int xspeed =speed; xspeed > 0; xspeed--) {
+							if (goLeft(Character.posx, Character.posy, Character.hight, xspeed)) {
+								System.out.println(xspeed);
+								for (int i = 0; i < N; i++)
+									a[i].setX(a[i].getX() + xspeed);
+								for (int E = 0; E < NE; E++)
+									if (!Enemy[E].Dead) {
+										Enemy[E].ConstantPosx += xspeed;
+										Enemy[E].posx += xspeed;
+									}
+								postion -= xspeed;
+								break;
+						}
+
 //						} else if (goLeft(Character.posx - 1, Character.posy, Character.width, Character.hight)) {
 //							for (int i = 0; i < N; i++)
 //								a[i].setX(a[i].getX() + 1);
@@ -616,33 +610,50 @@ public class Frame extends JFrame {
 		new Frame();
 	}
 
-	public boolean goLeft(int x, int y, int w, int h , int speed) {
+	// Check if you can go Left
+	public boolean goLeft(int x, int y, int h , int speed) {
+		int hitboxX = 0 , hitboxy = 0;
+		
+		// Going through all hit box in the game
 		for (int i = 0; i < N; i++) {
-			int X1 = a[i].getX() + a[i].getLH();
-			int Y1 = a[i].getY() + a[i].getLV();
-			if(y <= Y1 && y + h >= a[i].getY() && X1 <= x && x <= X1 + speed - 3) {
-				System.out.println("x = " + x + " x = " + speed);
-				return false;}
-
-		}
-		return true;
-	}
-
-	public boolean goRight(int x, int y, int w, int h) {
-		for (int i = 0; i < N; i++) {
-			if (!(x + 1 > a[i].getX() + a[i].getLH() || x + w - 1 < a[i].getX())
-					&& !(y + 1 > a[i].getY() + a[i].getLV() || y + h - 2 < a[i].getY()))
+			hitboxX = a[i].getX() + a[i].getLH();
+			hitboxy = a[i].getY() + a[i].getLV();
+			
+			if(y <= hitboxy && y + h >= a[i].getY() && hitboxX <= x && x < hitboxX + speed) 
 				return false;
+			
 		}
 		return true;
 	}
 
+	// Check if you can go Right
+	public boolean goRight(int x, int y, int w, int h, int speed) {
+		int hitboxX = 0 , hitboxy = 0;
+		
+		// Going through all hit box in the game
+		for (int i = 0; i < N; i++) {
+			hitboxX = a[i].getX() ;
+			hitboxy = a[i].getY() + a[i].getLV();
+			
+			if (y <= hitboxy && y + h >= a[i].getY() && hitboxX >= x + w && x + w > hitboxX - speed)
+				return false;
+			
+		}
+		return true;
+	}
+
+	// Check if you can go up
 	public boolean checkJump(int x, int y, int w, int h) {
-		for (int i = 0; i < N && !Finish; i++) {
-			if (y + h - 1 > a[i].getY() && y + h - 1 < a[i].getY() + a[i].getLV()
-					&& !(x + 1 > a[i].getX() + a[i].getLH() || x + w < a[i].getX() + 1)) {
+		int hitboxX = 0 , hitboxY = 0;
+		
+		// Going through all hit box in the game
+		for (int i = 0; i < N; i++) {
+			hitboxX = a[i].getX() + a[i].getLH();
+			hitboxY = a[i].getY() + a[i].getLV();
+			
+			if(x <= hitboxX && x + w >= a[i].getX() && a[i].getY() <= y + h && y + h <= a[i].getY() + 1) 
 				return false;
-			}
+			
 		}
 		return true;
 	}
