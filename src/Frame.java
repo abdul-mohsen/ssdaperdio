@@ -245,7 +245,7 @@ public class Frame extends JFrame {
 				if ((action == left || action == left1) && !Left) {
 					last = -1;
 					Character.setLeft();
-					if (goLeft(Character.posx, Character.posy, Character.width, Character.hight)) {
+					if (goLeft(Character.posx, Character.posy, Character.width, Character.hight, speed)) {
 						Left = true;
 						z5 = new movment();
 						z5.start();
@@ -421,7 +421,7 @@ public class Frame extends JFrame {
 						} else
 							break;
 					} else {
-						if (goLeft(this.posx - 5, this.posy, this.width, this.hight)&&(LL==0||this.posx<LL)) {
+						if (goLeft(this.posx - 5, this.posy, this.width, this.hight, speed)&&(LL==0||this.posx<LL)) {
 							this.posx -= 5;
 							repaint();
 						} else
@@ -558,26 +558,25 @@ public class Frame extends JFrame {
 
 					}
 					if (last == -1 && !Finish && Left) {
-						if (goLeft(Character.posx - speed, Character.posy, Character.width, Character.hight)) {
+						if (goLeft(Character.posx, Character.posy, Character.width, Character.hight, speed)) {
 							for (int i = 0; i < N; i++)
 								a[i].setX(a[i].getX() + speed);
 							for (int E = 0; E < NE; E++)
 								if (!Enemy[E].Dead) {
 									Enemy[E].ConstantPosx += speed;
-									if (goLeft(Enemy[E].posx + speed, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
-										Enemy[E].posx += speed;
+									Enemy[E].posx += speed;
 								}
 							postion -= speed;
-						} else if (goLeft(Character.posx - 1, Character.posy, Character.width, Character.hight)) {
-							for (int i = 0; i < N; i++)
-								a[i].setX(a[i].getX() + 1);
-							for (int E = 0; E < NE; E++)
-								if (!Enemy[E].Dead) {
-									Enemy[E].ConstantPosx += 1;
-									if (goLeft(Enemy[E].posx + 1, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
-										Enemy[E].posx += 1;
-								}
-							postion -= 1;
+//						} else if (goLeft(Character.posx - 1, Character.posy, Character.width, Character.hight)) {
+//							for (int i = 0; i < N; i++)
+//								a[i].setX(a[i].getX() + 1);
+//							for (int E = 0; E < NE; E++)
+//								if (!Enemy[E].Dead) {
+//									Enemy[E].ConstantPosx += 1;
+//									if (goLeft(Enemy[E].posx + 1, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
+//										Enemy[E].posx += 1;
+//								}
+//							postion -= 1;
 						}
 						
 
@@ -617,11 +616,14 @@ public class Frame extends JFrame {
 		new Frame();
 	}
 
-	public boolean goLeft(int x, int y, int w, int h) {
+	public boolean goLeft(int x, int y, int w, int h , int speed) {
 		for (int i = 0; i < N; i++) {
-			if (!(x + 1 > a[i].getX() + a[i].getLH() || x + w - 1 < a[i].getX() + 1)
-					&& !(y + 1 > a[i].getY() + a[i].getLV() || y + h - 2 < a[i].getY()))
-				return false;
+			int X1 = a[i].getX() + a[i].getLH();
+			int Y1 = a[i].getY() + a[i].getLV();
+			if(y <= Y1 && y + h >= a[i].getY() && X1 <= x && x <= X1 + speed - 3) {
+				System.out.println("x = " + x + " x = " + speed);
+				return false;}
+
 		}
 		return true;
 	}
