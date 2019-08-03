@@ -458,27 +458,65 @@ public class Frame extends JFrame {
 			synchronized (lock2) {
 				Character.air = false;
 				fall = false;
-
-				while (checkJump(Character.posx, Character.posy, Character.width, Character.hight)) {
-					if (!checkJump(Character.posx, Character.posy - (int) (con - d), Character.width,
-							Character.hight)) {
-						Character.posy = Maxjump(Character.posx, Character.posy, Character.width, Character.hight);
-						repaint();
-						d = 0;
-						Character.air = true;
-						fall = true;
-						break;
-					} else if (d < con && -1 != goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
-							Character.hight)) {
-						Character.posy = goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
-								Character.hight) - 1;
-						d = con;
+				int y_speed;
+				while (true) {
+					// if d < con    going up
+					//      check if hit the ceiling
+					// if d >= con going down
+					//      check if on ground
+					d += 0.3 * proY;
+					y_speed = (int)(con - d);
+					
+					if(y_speed > 0) {
+						System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + y_speed);
+						if(hitTheCeiling(Character.posx, Character.posy, Character.width, Character.hight, y_speed)) {
+							Character.posy -= distanceToCeiling(Character.posx, Character.posy, Character.width, Character.hight, y_speed) - 1;
+							d = con; // to start falling
+						} else {
+							Character.posy -= y_speed;
+						}
+						
 					} else {
-						if (!Finish)
-							Character.posy -= (int) (con - d);
+						System.out.println("______________________________" +  + y_speed);
+						if(onTheGround(Character.posx, Character.posy, Character.width, Character.hight, -y_speed)) {
+							Character.posy += distanceToGround(Character.posx, Character.posy, Character.width, Character.hight, -y_speed) - 1;
+							d = 0; // to stop falling
+							Character.air = true;
+							fall = true;
+							System.out.println("Done");
+							break;
+							
+						} else {
+							Character.posy -= y_speed;
+						}
 					}
-					if (!Finish)
-						d += 0.3 * proY;
+//
+//					
+//					
+//					
+//					// if the object will hit the ceiling
+//					if (!checkJump(Character.posx, Character.posy - (int) (con - d), Character.width, Character.hight)){
+//						Character.posy = Maxjump(Character.posx, Character.posy, Character.width, Character.hight);
+//						repaint();
+//						d = 0;
+//						Character.air = true;
+//						fall = true;
+//						break;
+//					}
+//					// if there is no ceiling
+//					else if (d < con && -1 != goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
+//							Character.hight)) {
+//						Character.posy = goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
+//								Character.hight) - 1;
+//						d = con;
+//					}
+//					// Have no clue what it going on here
+//					else {
+//						if (!Finish)
+//							Character.posy -= (int) (con - d);
+//					}
+//					if (!Finish)
+//						d += 0.3 * proY;
 					// here
 					// Lost statment // here is the reset option
 					for (int E = 0; E < NE; E++)
@@ -549,7 +587,6 @@ public class Frame extends JFrame {
 					if (last == -1 && !Finish && Left) {
 						for(int xspeed =speed; xspeed > 0; xspeed--) {
 							if (goLeft(Character.posx, Character.posy, Character.hight, xspeed)) {
-								System.out.println(xspeed);
 								for (int i = 0; i < N; i++)
 									a[i].setX(a[i].getX() + xspeed);
 								for (int E = 0; E < NE; E++)
@@ -560,17 +597,6 @@ public class Frame extends JFrame {
 								postion -= xspeed;
 								break;
 						}
-
-//						} else if (goLeft(Character.posx - 1, Character.posy, Character.width, Character.hight)) {
-//							for (int i = 0; i < N; i++)
-//								a[i].setX(a[i].getX() + 1);
-//							for (int E = 0; E < NE; E++)
-//								if (!Enemy[E].Dead) {
-//									Enemy[E].ConstantPosx += 1;
-//									if (goLeft(Enemy[E].posx + 1, Enemy[E].posy, Enemy[E].width, Enemy[E].hight))
-//										Enemy[E].posx += 1;
-//								}
-//							postion -= 1;
 						}
 						
 
@@ -651,13 +677,54 @@ public class Frame extends JFrame {
 			hitboxX = a[i].getX() + a[i].getLH();
 			hitboxY = a[i].getY() + a[i].getLV();
 			
-			if(x <= hitboxX && x + w >= a[i].getX() && a[i].getY() <= y + h && y + h <= a[i].getY() + 1) 
+			if(x <= hitboxX && x + w >= a[i].getX() && a[i].getY() < y + h -6 && y + h -6 <= a[i].getY() + 500)
+				System.out.println(y);
 				return false;
 			
 		}
 		return true;
 	}
 
+	public boolean hitTheCeiling(int x, int y, int w, int h, int y_speed) {
+		return distanceToCeiling(x, y, w, h, y_speed) > y_speed;
+	}
+	
+	public int distanceToCeiling(int x, int y, int w, int h, int y_speed) {
+		int hitboxX = 0 , hitboxY = 0;
+		
+		// Going through all hit box in the game
+		for (int i = 0; i < N; i++) {
+			hitboxX = a[i].getX() + a[i].getLH();
+			hitboxY = a[i].getY() + a[i].getLV();
+			if(y < hitboxY && y_speed > y - hitboxY && x <= hitboxX && x + w >= a[i].getY()) {
+				y_speed = y - hitboxY;
+			}
+		}
+		return y_speed;
+	}
+	
+	public boolean onTheGround(int x, int y, int w, int h, int y_speed) {
+		return distanceToGround(x, y, w, h, y_speed) != y_speed;
+	}
+	
+	public int distanceToGround(int x, int y, int w, int h, int y_speed) {
+		int hitboxX = 0 , hitboxY = 0;
+		
+		// Going through all hit box in the game
+		for (int i = 0; i < N; i++) {
+			hitboxX = a[i].getX() + a[i].getLH();
+			hitboxY = a[i].getY() + a[i].getLV();
+//			if(y + h < a[i].getY()) {
+//				System.out.println("WTF" + (a[i].getY() - (y + h)) );
+//			}
+			if(y + h < a[i].getY() && y_speed > a[i].getY() - (y + h) && x <= hitboxX && x + w >= a[i].getX()) {
+				y_speed = a[i].getY() - (y + h);
+				System.out.println("WTFuu = " + y_speed);
+			}
+		}
+		return y_speed;
+	}
+	
 	public int Maxjump(int x, int y, int w, int h) {
 		int temp = 0;
 		for (int i = 1; i < N; i++) {
