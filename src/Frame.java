@@ -490,35 +490,7 @@ public class Frame extends JFrame {
 							Character.posy -= y_speed;
 						}
 					}
-//
-//					
-//					
-//					
-//					// if the object will hit the ceiling
-//					if (!checkJump(Character.posx, Character.posy - (int) (con - d), Character.width, Character.hight)){
-//						Character.posy = Maxjump(Character.posx, Character.posy, Character.width, Character.hight);
-//						repaint();
-//						d = 0;
-//						Character.air = true;
-//						fall = true;
-//						break;
-//					}
-//					// if there is no ceiling
-//					else if (d < con && -1 != goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
-//							Character.hight)) {
-//						Character.posy = goUp(Character.posx, Character.posy - (int) (con - d), Character.width,
-//								Character.hight) - 1;
-//						d = con;
-//					}
-//					// Have no clue what it going on here
-//					else {
-//						if (!Finish)
-//							Character.posy -= (int) (con - d);
-//					}
-//					if (!Finish)
-//						d += 0.3 * proY;
-					// here
-					// Lost statment // here is the reset option
+
 					for (int E = 0; E < NE; E++)
 						if (!Enemy[E].Dead && Character.posy + Character.hight < Enemy[E].posy
 								&& Character.posy + Character.hight + d / 2 > Enemy[E].posy
